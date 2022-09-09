@@ -3,17 +3,20 @@ using UnityEngine.UI;
 using System;
 using System.IO;
 using TMPro;
+using Zenject;
 
 public class GameManager : MonoBehaviour
 {
-    
-    public Button buttonMoreCard, buttonEnough, buttonNewGame;
 
-    public TextMeshProUGUI text, score;
+    [SerializeField] private Button buttonMoreCard, buttonEnough, buttonNewGame;
 
-    public Player player;
-    public Enemy enemy;
-    public Deck deck;
+    [SerializeField] private TextMeshProUGUI text, score;
+
+    [Inject] private Player player;
+    [Inject] private Enemy enemy;
+    [Inject] private Deck deck;
+
+    private bool gameStop;
     private const string path = "Assets/Data/SaveData.txt";
 
 
@@ -26,27 +29,29 @@ public class GameManager : MonoBehaviour
         ReadingData();
         StartNewGame();
 
-        score.text = "Score: " + player.playerScore;
+        score.text = "Score: " + player.PlayerScore;
     }
 
-    void WritingData()
+    private void WritingData()
     {
         StreamWriter streamWriter = new StreamWriter(path, false, System.Text.Encoding.Default);
-        streamWriter.Write(player.playerScore.ToString());
+        streamWriter.Write(player.PlayerScore.ToString());
         streamWriter.Close();
     }
 
-    void ReadingData()
+    private void ReadingData()
     {
         StreamReader streamReader = new StreamReader(path);
-        
-        player.playerScore = Int32.Parse(streamReader.ReadLine());
-        
+
+        player.PlayerScore = Int32.Parse(streamReader.ReadLine());
+
         streamReader.Close();
     }
 
     private void StartNewGame()
     {
+        gameStop = false;
+
         deck.NewGame();
 
         deck.TakeCardPlayer();
@@ -55,78 +60,97 @@ public class GameManager : MonoBehaviour
         deck.TakeFirstCardEnemy();
         deck.TakeCardEnemy();
 
-        if (player.playerPoints == 21) GameWin();
+        if (player.PlayerPoints == 21) GameWin();
     }
 
     private void ButtonNewGame()
     {
-        enemy.imageCard1.SetActive(false);
-        deck.cardback.SetActive(true);
+        enemy.ImageCard1.SetActive(false);
+
+        deck.Cardback.SetActive(true);
 
         buttonNewGame.gameObject.SetActive(false);
+
         text.gameObject.SetActive(false);
-        for (int i = 2; i < player.imageCard.Length; i++)
+
+        for (int i = 2; i < player.ImageCard.Length; i++)
         {
-            player.imageCard[i].SetActive(false);
+            player.ImageCard[i].SetActive(false);
         }
-        for (int i = 1; i < enemy.imageCard2345.Length; i++)
+
+        for (int i = 1; i < enemy.ImageCard2345.Length; i++)
         {
-            enemy.imageCard2345[i].SetActive(false);
+            enemy.ImageCard2345[i].SetActive(false);
         }
 
         StartNewGame();
     }
 
-    public void ButtonMore()
+    private void ButtonMore()
     {
-        deck.TakeCardPlayer();
+        if (!gameStop)
+        {
+            deck.TakeCardPlayer();
 
-        if (player.playerPoints > 21) GameLose();
+            if (player.PlayerPoints > 21) GameLose();
+        }
+        
     }
 
-    public void ButtonEnough()
+    private void ButtonEnough()
     {
-        enemy.imageCard1.SetActive(true);
-        deck.cardback.SetActive(false);
-        if (player.playerPoints < enemy.enemyPoints) GameLose();
-        else if (enemy.enemyPoints < player.playerPoints) deck.TakeCardEnemy();
-        else if (enemy.enemyPoints > player.playerPoints && enemy.enemyPoints <= 21) GameLose();
-        else if (enemy.enemyPoints > 21) GameWin();
-        else if (enemy.enemyPoints < 21) deck.TakeCardEnemy();
-        else if (enemy.enemyPoints > 21) GameWin();
-        else if (enemy.enemyPoints > player.playerPoints && enemy.enemyPoints <= 21) GameLose();
-        else if (enemy.enemyPoints < 21) deck.TakeCardEnemy();
-        else if (enemy.enemyPoints > 21) GameWin();
-        else if (enemy.enemyPoints > player.playerPoints && enemy.enemyPoints <= 21) GameLose();
-        else if (enemy.enemyPoints < 21) deck.TakeCardEnemy();
-        else if (enemy.enemyPoints > 21) GameWin();
-        else if (enemy.enemyPoints > player.playerPoints && enemy.enemyPoints <= 21) GameLose();
-        else if (enemy.enemyPoints < 21) deck.TakeCardEnemy();
-        else if (enemy.enemyPoints > 21) GameWin();
-        else if (enemy.enemyPoints > player.playerPoints && enemy.enemyPoints <= 21) GameLose();
-        else if (enemy.enemyPoints < 21) deck.TakeCardEnemy();
-        else if (enemy.enemyPoints > 21) GameWin();
-        else if (enemy.enemyPoints > player.playerPoints && enemy.enemyPoints <= 21) GameLose();
+        if (!gameStop)
+        {
+            enemy.ImageCard1.SetActive(true);
+            deck.Cardback.SetActive(false);
 
+            while (enemy.EnemyPoints <= player.PlayerPoints)
+            {
+                deck.TakeCardEnemy();
+            }
+
+            if (enemy.EnemyPoints < 22 && enemy.EnemyPoints > player.PlayerPoints)
+            {
+                GameLose();
+            }
+
+            else
+            {
+                GameWin();
+            }
+        }
+        
     }
 
-    public void GameWin()
+    private void GameWin()
     {
-        player.playerScore += 15;
-        score.text = "Score: " + player.playerScore.ToString();
-        text.text = "Digga! Gewonnen!";
+        gameStop = true;
+
+        player.PlayerScore += 15;
+
+        score.text = "Score: " + player.PlayerScore.ToString();
+
+        text.text = "Game Won!";
         text.gameObject.SetActive(true);
+
         buttonNewGame.gameObject.SetActive(true);
+
         WritingData();
     }
 
-    public void GameLose()
+    private void GameLose()
     {
-        player.playerScore -= 2;
-        score.text = "Score: " + player.playerScore.ToString();
+        gameStop = true;
+
+        player.PlayerScore -= 15;
+
+        score.text = "Score: " + player.PlayerScore.ToString();
+
         text.text = "Looser";
         text.gameObject.SetActive(true);
+
         buttonNewGame.gameObject.SetActive(true);
+
         WritingData();
     }
 }

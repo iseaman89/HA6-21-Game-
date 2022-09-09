@@ -1,13 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class Enemy : MonoBehaviour
 {
-    public int enemyPoints;
+    private int enemyPoints;
 
-    public GameObject imageCard1;
-    public GameObject[] imageCard2345 = new GameObject[7];
+    [SerializeField] private GameObject imageCard1;
+    [SerializeField] private GameObject[] imageCard2345 = new GameObject[7];
 
+    public GameObject ImageCard1 { get => imageCard1; set => imageCard1 = value; }
+    public GameObject[] ImageCard2345 { get => imageCard2345; set => imageCard2345 = value; }
+    public int EnemyPoints { get => enemyPoints; set => enemyPoints = value; }
 }

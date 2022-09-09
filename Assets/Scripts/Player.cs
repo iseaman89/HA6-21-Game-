@@ -1,14 +1,13 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
-    public int playerPoints;
-    public int playerScore = 0;
+    private int playerPoints;
+    private int playerScore;
 
-    public GameObject[] imageCard = new GameObject[8];
+    [SerializeField] private GameObject[] imageCard = new GameObject[8];
 
-    
+    public int PlayerPoints { get => playerPoints; set => playerPoints = value; }
+    public int PlayerScore { get => playerScore; set => playerScore = value; }
+    public GameObject[] ImageCard { get => imageCard; set => imageCard = value; }
 }
